@@ -1,0 +1,50 @@
+<%- include ("header") %>
+    <%- include ("loading") %>
+        <%- include ("toasts") %>
+
+            <div class="container-fluid d-flex align-items-center justify-content-center vh-100 bg-dark overflow-auto">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="loginForm" action="/login" method="POST">
+                                <%- include ("logo") %>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="matricula" name="matricula"
+                                                    placeholder="matricula" autocomplete="on" required>
+                                                <label for="matricula">
+                                                    <i class="bi bi-person-circle"></i>
+                                                    Usuário FLUIG
+                                                </label>
+                                            </div>
+                                            <div class="form-floating">
+                                                <input type="password" class="form-control" id="senha" name="senha"
+                                                    placeholder="Senha" autocomplete="on" required>
+                                                <label for="senha">
+                                                    <i class="bi bi-123"></i>
+                                                    Senha
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <button class="btn btn-dark btn_custom_1 w-100" type="submit">
+                                                <i class="bi bi-box-arrow-in-right"></i>
+                                                Acessar
+                                            </button>
+                                        </div>
+                                    </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <%- include ("footer") %>
+
+                <% if(msg){ %>
+                    <script>
+                        toast("<%= msg %>", "danger")
+                    </script>
+                    <% } %>

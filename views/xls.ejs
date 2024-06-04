@@ -1,0 +1,70 @@
+<%- include ("header") %>
+    <%- include ("loading") %>
+        <%- include ("toasts") %>
+
+            <div
+                class="container-fluid d-flex flex-column align-items-center justify-content-center vh-100 bg-dark overflow-auto">
+                <div class="card cardTable">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <table class="table tableFixHead">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <input type="checkbox" name="chk_0" id="chk_0" onclick="selectAll()">
+                                            </th>
+                                            <% Object.keys(xlsData[0]).forEach(key=> { %>
+                                                <th>
+                                                    <%= key %>
+                                                </th>
+                                                <% }); %>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% xlsData.forEach((item,index)=> { %>
+                                            <tr id="tr_<%= index %>">
+                                                <td>
+                                                    <input type="checkbox" name="chk_<%= index %>"
+                                                        id="chk_<%= index %>">
+                                                </td>
+                                                <% Object.values(item).forEach(value=> { %>
+                                                    <td>
+                                                        <%= value %>
+                                                    </td>
+                                                    <% }); %>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex flex-row justify-content-center mt-5" id="actions">
+                    <div class="col">
+                        <a class="btn btn-danger w-100 h-100 text-white" href="/">
+                            Sair<br>
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a class="btn btn-dark btn_custom_2 w-100 h-100 text-white" type="button"
+                            href="/download/<%= userId %>/<%= xlsFileName %>" id="downloadBtn">
+                            Baixar Planilha
+                            <i class="bi bi-filetype-xls"></i>
+                        </a>
+                    </div>
+                    <% if(setor!="Financeiro" ){%>
+                        <div class="col">
+                            <a class="btn btn-dark btn_custom_2 w-100 h-100 text-white" type="button"
+                                href="/download/<%= userId %>/<%= zipFileName %>" id="downloadBtn">
+                                Baixar arquivos
+                                <i class="bi bi-file-earmark-zip"></i>
+                            </a>
+                        </div>
+                        <% } %>
+                </div>
+            </div>
+
+            <%- include ("footer") %>

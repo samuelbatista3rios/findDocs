@@ -1,0 +1,41 @@
+<%- include ("header") %>
+    <%- include ("loading") %>
+        <%- include ("toasts") %>
+            <div
+                class="container-fluid d-flex flex-column align-items-center justify-content-center vh-100 bg-dark overflow-auto">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="mergeDocs">
+                                <%- include ("logo") %>
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="cpFile" name="cpFile" required>
+                                            <label for="cpFile">Arquivo CP</label>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="docFile" name="docFile"
+                                                required>
+                                            <label for="docFile">Arquivo DOC</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <button class="btn btn-dark btn_custom_1 w-100" type="submit" id="btnSend2">
+                                            Unificar
+                                            <i class="bi bi-intersect"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <%- include ("footer") %>
+                <script src="js/merge.js"></script>

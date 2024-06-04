@@ -1,0 +1,76 @@
+@media only screen and (max-width: 800px) {
+    .card {
+        width: 80%;
+    }
+}
+
+@media only screen and (min-width: 801px) {
+    .card {
+        width: 60%;
+    }
+}
+
+@media only screen and (min-width: 1366px) {
+    .card {
+        width: 40%;
+    }
+}
+
+.cardTable {
+    width: 100%;
+    height: 600px;
+    overflow-x: scroll;
+    overflow-y: scroll;
+}
+
+table {
+    font-size: 12px;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+}
+
+table tr {
+    border: solid #3FA2AD 1px;
+}
+
+.tableFixHead thead th {
+    text-align: center;
+    vertical-align: middle;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #3FA2AD;
+}
+
+.btn_custom_1 {
+    background-color: #3FA2AD;
+    color: #FFF;
+}
+
+.btn_custom_2 {
+    background-color: #337E8B;
+    color: #FFF;
+}
+
+::-webkit-scrollbar {
+    width: 4px !important;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 7px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: rgb(90, 90, 90);
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #337E8B;
+}

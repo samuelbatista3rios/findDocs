@@ -1,0 +1,30 @@
+{
+  "name": "finddocs",
+  "version": "1.0.0",
+  "description": "Buscar, encontrar e unificar documentos financeiros da plataforma FLUIG",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon run dev",
+    "prod": "pm2 start ecosystem.config.js"
+  },
+  "author": "Marllon Sousa",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.6.8",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.10",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "md5": "^2.3.0",
+    "mime-types": "^2.1.35",
+    "mssql": "^10.0.2",
+    "nodemon": "^3.1.0",
+    "pdf-lib": "^1.17.1",
+    "python-shell": "^5.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^0.0.1"
+  }
+}

@@ -1,0 +1,121 @@
+<%- include ("header") %>
+    <%- include ("loading") %>
+        <%- include ("toasts") %>
+
+            <div
+                class="container-fluid d-flex flex-column align-items-center justify-content-center vh-100 bg-dark overflow-auto">
+                <div class="d-flex justify-content-center align-items-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="findDocs">
+                                <%- include ("logo") %>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="unidadeGerenciada"
+                                                    name="unidadeGerenciada" aria-label="Selecione a Unidade Gerenciada"
+                                                    required>
+                                                    <option value="">Selecione</option>
+                                                </select>
+                                                <label for="unidadeGerenciada">Unidade Gerenciada</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col mb-3">
+                                            <div class="form-floating">
+                                                <input type="date" class="form-control" id="dataInicio"
+                                                    name="dataInicio" required>
+                                                <label for="dataInicio">Data Inicial</label>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <input type="date" class="form-control" id="dataFim" name="dataFim"
+                                                    required>
+                                                <label for="dataFim">Data Final</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="setorSolicitante"
+                                                    name="setorSolicitante" aria-label="Selecione o setor solicitante"
+                                                    onchange="changeSetor()" required>
+                                                    <option value="">Selecione</option>
+                                                    <option class="d-none" data-setor="Financeiro" value="Financeiro">Financeiro</option>
+                                                    <option class="d-none" data-setor="Custos" value="Custos">Custos</option>
+                                                    <option class="d-none" data-setor="Custos" value="Custos2">Custos (Download de NFs)</option>
+                                                    <option class="d-none" data-setor="SESMT" value="SESMT">SESMT</option>
+                                                </select>
+                                                <label for="setorSolicitante">Setor Solicitante</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3 d-none" id="sesmt_options">
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="tipoDoc" name="tipoDoc"
+                                                    aria-label="Selecione o setor solicitante">
+                                                    <option value="">Selecione</option>
+                                                    <option value="Todos">Todos</option>
+                                                    <option value="ASO Admissional">ASO Admissional</option>
+                                                    <option value="ASO Periódico">ASO Periódico</option>
+                                                    <option value="ASO Demissional">ASO Demissional</option>
+                                                    <option value="ASO Mudança de função">ASO Mudança de função</option>
+                                                    <option value="ASO Retorno ao trabalho">ASO Retorno ao trabalho
+                                                    </option>
+                                                    <option value="Ficha EPI ">Ficha EPI </option>
+                                                </select>
+                                                <label for="tipoDoc">Tipo de documento</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <button class="btn btn-dark btn_custom_1 w-100" type="submit" id="btnSend">
+                                                Pesquisar
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                            </form>
+                        </div>
+                        <div class="card-footer d-none" id="actions">
+                            <div class="row mb-1">
+                                <div class="col">
+                                    <a class="btn btn-dark btn_custom_2 w-100 text-white" href="/xls">
+                                        Visualizar
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col">
+                                    <a class="btn btn-dark btn_custom_2 w-100 text-white" href="/download/"
+                                        type="button" id="downloadPln">
+                                        Baixar Planilha
+                                        <i class="bi bi-filetype-xls"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col d-none" id="baixarArquivos">
+                                    <a class="btn btn-dark btn_custom_2 w-100 text-white" href="/download/"
+                                        type="button" id="downloadBtn">
+                                        Baixar Arquivos
+                                        <i class="bi bi-file-earmark-zip"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <%- include ("footer") %>
+                <script src="js/find.js"></script>
+                <script>
+                    controlOptions("<%= userGroups %>")
+                </script>
