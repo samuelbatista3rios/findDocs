@@ -4,7 +4,6 @@ const axios = require("axios")
 const { PDFDocument } = require("pdf-lib");
 const ExcelJS = require("exceljs");
 const archiver = require("archiver");
-
 // API FLUIG
 const fluigApi = require("./configs/fluig")
 // LOVE PDF
@@ -12,7 +11,8 @@ const mergePy = require("./mergeWithPy")
 // URL FILE PLANILHA
 const ftpEnv = String.raw`\\192.168.220.143/docs`;
 // PATHS
-const mergedPath = path.join(__dirname, "/public/merged")
+const mergedPathDev = path.join(__dirname, "/public/merged")
+const mergedPathProd = path.join("D:", "mergedDocs")
 const usersPath = path.join(__dirname, "/public/users")
 const logs = require("./logs")
 const ftpUrl = "\\\\192.168.220.143\\public"
@@ -130,7 +130,7 @@ const downloadFile = async (url, saveFileInPath) => {
                 return true
             })
             writer.on("error", (error) => {
-                fs.unlink(mergedPath, () => { reject(error) })
+                fs.unlink(mergedPathProd, () => { reject(error) })
                 return false
             })
         })
@@ -245,14 +245,14 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         case "ARQUIVO NF":
                                             if (fileName.includes("CP_")) {
                                                 fileName = fileName.replace("CP", "MERGED")
-                                                const downloadedFiles = await requestDownloadFile(mergedPath, [nfFile, pesqFile], null, pastaFilial)
+                                                const downloadedFiles = await requestDownloadFile(mergedPathProd, [nfFile, pesqFile], null, pastaFilial)
                                                 if (downloadedFiles.filter(y => y == true).length == 2) {
-                                                    const mergedJS = await mergeFiles([nfFile, pesqFile], fileName, path.join(mergedPath, pastaFilial))
+                                                    const mergedJS = await mergeFiles([nfFile, pesqFile], fileName, path.join(mergedPathProd, pastaFilial))
                                                     if (mergedJS) {
-                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPath, pastaFilial))
+                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathProd, pastaFilial))
                                                     } else {
-                                                        await mergePy.executarMerge([nfFile, pesqFile], fileName, path.join(mergedPath, pastaFilial))
-                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPath, pastaFilial))
+                                                        await mergePy.executarMerge([nfFile, pesqFile], fileName, path.join(mergedPathProd, pastaFilial))
+                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathProd, pastaFilial))
                                                     }
                                                 }
                                             }
