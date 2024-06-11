@@ -321,7 +321,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         // CONSIDERO ARQUIVOS CP E OUTROS, POREM APENAS FAÇO A UNIFICAÇÃO COM ARQUIVOS CP
                                         case "ARQUIVO NF":
                                             if (fileName.includes("CP_")) {
-                                                fileName = fileName.replace("CP", "MERGED")
+                                                fileName = fileName.replace("CP", "MERGED_CUS")
                                                 const downloadedFiles = await requestDownloadFile(mergedPathProd, [pesqFile, nfFile], null, pastaFilial)
                                                 if (downloadedFiles.filter(y => y == true).length == 2) {
                                                     const mergedJS = await mergeFiles([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
