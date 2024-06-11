@@ -212,12 +212,12 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
         // Adicionar dados
         for (const row of dataset) {
             switch (origin) {
-                case "Financeiro": // PARA O FINANCEIRO, O ARQUIVO CP (COLUNA ARQUIVO NF) DEVE SER O PRIMEIRO A SER PASSADO PARA UNIFICAÇÃO
+                case "Financeiro":
                     var nfFile = row["ARQUIVO NF"]
                     var pesqFile = row["ARQUIVO PESQUISA"]
-                    var cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
-                    var docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
-                    var statusFiles = cpStatus + " / " + docStatus
+                    const cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
+                    const docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
+                    const statusFiles = cpStatus + " / " + docStatus
                     if (testColumnValue(nfFile)) {
                         var fileName = await getDocData(nfFile, 1)
                         var pastaFilial = await getDocData(nfFile, 2)
@@ -254,6 +254,9 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                                         await mergePy.executarMerge([nfFile, pesqFile], fileName, path.join(mergedPathProd, pastaFilial))
                                                         deleteTempFiles([nfFile, pesqFile], path.join(mergedPathProd, pastaFilial))
                                                     }
+                                                } else {
+                                                    logs.writeLog("Error ao baixar: ", `NF: ${nfFile} - PESQ: ${pesqFile}`)
+                                                    console.log("Error ao baixar: ", `NF: ${nfFile} - PESQ: ${pesqFile}`)
                                                 }
                                             }
                                             row["ARQUIVO NF"] = `${ftpEnv}/${pastaFilial}/${fileName}`
@@ -289,19 +292,18 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                         worksheet.addRow(values);
                     }
                     break;
-                case "Custos": // PARA O CUSTOS, O ARQUIVO DOC (COLUNA ARQUIVO PESQUISA) DEVE SER O PRIMEIRO A SER PASSADO PARA UNIFICAÇÃO
+                case "Custos":
                     var nfFile = row["ARQUIVO NF"]
                     var pesqFile = row["ARQUIVO PESQUISA"]
-                    var cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
-                    var docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
-                    var statusFiles = cpStatus + " / " + docStatus
+                    const cpStatus2 = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
+                    const docStatus2 = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
+                    const statusFiles2 = cpStatus2 + " / " + docStatus2
                     if (testColumnValue(nfFile)) {
                         var fileName = await getDocData(nfFile, 1)
                         var pastaFilial = await getDocData(nfFile, 2)
                         pastaFilial = NormalizeString(pastaFilial)
                         //VERIFICA PRIMEIRO SE O ARQUIVO É DIFERENTE DE CP E DOC
                         if (!fileName.includes("CP") && !fileName.includes("DOC")) {
-                            //CASO O ARQUIVO SEJA CP, MAS NAO TENHA O DOC (POR SER REPASSE, RETORNA O LINK DO FTP)
                             var values = await Promise.all(headers.map(async header => {
                                 switch (header) {
                                     case "ARQUIVO NF":
@@ -311,7 +313,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         return row[header]
                                 }
                             }));
-                            xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                            xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles2 });
                             worksheet.addRow(values);
                         } else {
                             // SE NAO FOR ENTRA PARA O TRATAMENTO DE UNIFICAR
@@ -321,7 +323,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         // CONSIDERO ARQUIVOS CP E OUTROS, POREM APENAS FAÇO A UNIFICAÇÃO COM ARQUIVOS CP
                                         case "ARQUIVO NF":
                                             if (fileName.includes("CP_")) {
-                                                fileName = fileName.replace("CP", "MERGED_CUS")
+                                                fileName = fileName.replace("CP", "MERGED")
                                                 const downloadedFiles = await requestDownloadFile(mergedPathProd, [pesqFile, nfFile], null, pastaFilial)
                                                 if (downloadedFiles.filter(y => y == true).length == 2) {
                                                     const mergedJS = await mergeFiles([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
@@ -343,7 +345,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                             return row[header]
                                     }
                                 }));
-                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles2 });
                                 worksheet.addRow(values);
                             } else {
                                 //CASO O ARQUIVO SEJA CP, MAS NAO TENHA O DOC (POR SER REPASSE, RETORNA O LINK DO FTP)
@@ -356,12 +358,12 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                             return row[header]
                                     }
                                 }));
-                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles2 });
                                 worksheet.addRow(values);
                             }
                         }
                     } else {
-                        xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                        xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles2 });
                         var values = [...Object.values(row)]
                         worksheet.addRow(values);
                     }
