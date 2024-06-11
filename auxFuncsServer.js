@@ -212,12 +212,12 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
         // Adicionar dados
         for (const row of dataset) {
             switch (origin) {
-                case "Financeiro":
+                case "Financeiro": // PARA O FINANCEIRO, O ARQUIVO CP (COLUNA ARQUIVO NF) DEVE SER O PRIMEIRO A SER PASSADO PARA UNIFICAÇÃO
                     var nfFile = row["ARQUIVO NF"]
                     var pesqFile = row["ARQUIVO PESQUISA"]
-                    const cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
-                    const docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
-                    const statusFiles = cpStatus + " / " + docStatus
+                    var cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
+                    var docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
+                    var statusFiles = cpStatus + " / " + docStatus
                     if (testColumnValue(nfFile)) {
                         var fileName = await getDocData(nfFile, 1)
                         var pastaFilial = await getDocData(nfFile, 2)
@@ -289,20 +289,82 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                         worksheet.addRow(values);
                     }
                     break;
-                case "Custos":
-                    var nfFile = row["ARQUIVO NF"] != "" && row["ARQUIVO NF"] != undefined && row["ARQUIVO NF"] != null ? row["ARQUIVO NF"] : false;
-                    if (nfFile) {
+                case "Custos": // PARA O CUSTOS, O ARQUIVO DOC (COLUNA ARQUIVO PESQUISA) DEVE SER O PRIMEIRO A SER PASSADO PARA UNIFICAÇÃO
+                    var nfFile = row["ARQUIVO NF"]
+                    var pesqFile = row["ARQUIVO PESQUISA"]
+                    var cpStatus = testColumnValue(nfFile) ? "ARQUIVO NF: Sim" : "ARQUIVO NF: Não"
+                    var docStatus = testColumnValue(pesqFile) ? "ARQUIVO PESQUISA: Sim" : "ARQUIVO PESQUISA: Não"
+                    var statusFiles = cpStatus + " / " + docStatus
+                    if (testColumnValue(nfFile)) {
                         var fileName = await getDocData(nfFile, 1)
-                        var filesPath = path.join(userPath, "files");
-                        await createFolder(filesPath)
-                        var fileDownloaded = await requestDownloadFile(filesPath, nfFile, fileName, "")
-                        var values = [...Object.values(row), fileDownloaded ? "Sim" : "Não"];
-                        worksheet.addRow(values);
+                        var pastaFilial = await getDocData(nfFile, 2)
+                        pastaFilial = NormalizeString(pastaFilial)
+                        //VERIFICA PRIMEIRO SE O ARQUIVO É DIFERENTE DE CP E DOC
+                        if (!fileName.includes("CP") && !fileName.includes("DOC")) {
+                            //CASO O ARQUIVO SEJA CP, MAS NAO TENHA O DOC (POR SER REPASSE, RETORNA O LINK DO FTP)
+                            var values = await Promise.all(headers.map(async header => {
+                                switch (header) {
+                                    case "ARQUIVO NF":
+                                        row["ARQUIVO NF"] = `${ftpUrl}\\${nfFile}\\1000\\${fileName}`
+                                        return `${ftpUrl}\\${nfFile}\\1000\\${fileName}`
+                                    default:
+                                        return row[header]
+                                }
+                            }));
+                            xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                            worksheet.addRow(values);
+                        } else {
+                            // SE NAO FOR ENTRA PARA O TRATAMENTO DE UNIFICAR
+                            if (testColumnValue(pesqFile)) {
+                                var values = await Promise.all(headers.map(async header => {
+                                    switch (header) {
+                                        // CONSIDERO ARQUIVOS CP E OUTROS, POREM APENAS FAÇO A UNIFICAÇÃO COM ARQUIVOS CP
+                                        case "ARQUIVO NF":
+                                            if (fileName.includes("CP_")) {
+                                                fileName = fileName.replace("CP", "MERGED")
+                                                const downloadedFiles = await requestDownloadFile(mergedPathProd, [pesqFile, nfFile], null, pastaFilial)
+                                                if (downloadedFiles.filter(y => y == true).length == 2) {
+                                                    const mergedJS = await mergeFiles([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
+                                                    if (mergedJS) {
+                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathProd, pastaFilial))
+                                                    } else {
+                                                        await mergePy.executarMerge([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
+                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathProd, pastaFilial))
+                                                    }
+                                                }
+                                            }
+                                            row["ARQUIVO NF"] = `${ftpEnv}/${pastaFilial}/${fileName}`
+                                            return `${ftpEnv}/${pastaFilial}/${fileName}`
+                                        // BAIXO O ARQUIVO DOC CORRESPONDENTE PARA UNIFICAR COM O CP
+                                        case "ARQUIVO PESQUISA":
+                                            row["ARQUIVO PESQUISA"] = `${ftpEnv}/${pastaFilial}/${fileName}`
+                                            return `${ftpEnv}/${pastaFilial}/${fileName}`
+                                        default:
+                                            return row[header]
+                                    }
+                                }));
+                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                                worksheet.addRow(values);
+                            } else {
+                                //CASO O ARQUIVO SEJA CP, MAS NAO TENHA O DOC (POR SER REPASSE, RETORNA O LINK DO FTP)
+                                var values = await Promise.all(headers.map(async header => {
+                                    switch (header) {
+                                        case "ARQUIVO NF":
+                                            row["ARQUIVO NF"] = `${ftpUrl}\\${nfFile}\\1000\\${fileName}`
+                                            return `${ftpUrl}\\${nfFile}\\1000\\${fileName}`
+                                        default:
+                                            return row[header]
+                                    }
+                                }));
+                                xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
+                                worksheet.addRow(values);
+                            }
+                        }
                     } else {
+                        xlsFile.push({ ...row, "Arquivo(s) disponivel(is) no GED?": statusFiles });
                         var values = [...Object.values(row)]
                         worksheet.addRow(values);
                     }
-                    xlsFile.push({ ...row, "Arquivo disponivel no GED?": fileDownloaded ? "Sim" : "Não" });
                     break;
                 case "SESMT":
                     var filesPath = path.join(userPath, "files");
