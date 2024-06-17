@@ -132,16 +132,15 @@ app.post("/find", async (req, res) => {
         if (dataset.recordset.length > 0) {
             logs.writeLog(userId, `END FIND > ${setor} > RESULTS: ${dataset.recordset.length}`)
             xlsData = await aux.createXls(dataset.recordset, xlsFileName, userPath, setor)
-            if (setor != "Financeiro") {
+            if (setor != "Financeiro" && xlsData.length > 0) {
                 var originDir = path.join(userPath, "files");
                 var zipFilePath = path.join(userPath, zipFileName);
-                const zipped = await aux.zipFolder(originDir, zipFilePath)
-                zipped ? aux.deleteTempFiles(false, originDir) : false
+                var zipped = await aux.zipFolder(originDir, zipFilePath)
             }
             req.session.userData = {
                 xlsData,
                 xlsFileName,
-                zipFileName: setor == "Financeiro" ? false : zipFileName,
+                zipFileName,
                 setor: setor
             };
             res.send({

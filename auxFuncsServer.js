@@ -434,7 +434,9 @@ const zipFolder = async (folderPath, fileName) => {
         zipper.pipe(saidaZip);
         zipper.finalize();
         saidaZip.on("close", () => {
+            deleteTempFiles(false, folderPath)
             return true
+
         });
         return true
     } catch (error) {
@@ -476,4 +478,8 @@ const testColumnValue = (value) => {
     }
 }
 
-module.exports = { requestDownloadFile, mergeFiles, resetFolder, requestDownloadUrl, getDocData, createXls, zipFolder, NormalizeString, deleteTempFiles, resetUsersFolders, getUserData }
+const countValuesInPath = (path) => {
+    return fs.readdirSync(path).length
+}
+
+module.exports = { countValuesInPath, requestDownloadFile, mergeFiles, resetFolder, requestDownloadUrl, getDocData, createXls, zipFolder, NormalizeString, deleteTempFiles, resetUsersFolders, getUserData }
