@@ -208,7 +208,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
         const additionalHeader = origin != "Financeiro" ? "Arquivo disponivel no GED?" : null;
         const allHeaders = additionalHeader ? [...headers, additionalHeader] : headers;
         worksheet.addRow(allHeaders);
-
+        var countDownloadedFiles = 0
         // Adicionar dados
         for (const row of dataset) {
             switch (origin) {
@@ -373,6 +373,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                     await createFolder(filesPath)
                     var fileDownloaded = false
                     fileDownloaded = await requestDownloadFile(filesPath, row["COD_DOCUMENTO"], row["NOME_DOCUMENTO"], "")
+                    fileDownloaded ? countDownloadedFiles++ : countDownloadedFiles--
                     var values = [...Object.values(row), fileDownloaded ? "Sim" : "Não"];
                     worksheet.addRow(values);
                     xlsFile.push({ ...row, "Arquivo disponivel no GED?": fileDownloaded ? "Sim" : "Não" });
@@ -393,7 +394,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
         // Salvar o arquivo
         await workbook.xlsx.writeFile(filePath);
 
-        return xlsFile
+        return [xlsFile, countDownloadedFiles]
     } catch (error) {
         console.log("createXls: Erro ao criar arquivo XLS!", error)
         logs.writeLog("Error", "createXls: Erro ao criar arquivo XLS!", error)
@@ -436,7 +437,6 @@ const zipFolder = async (folderPath, fileName) => {
         saidaZip.on("close", () => {
             return true
         });
-        return true
     } catch (error) {
         console.log("zipFolder: Erro ao zipar arquivos!")
         logs.writeLog("Error", "zipFolder: Erro ao zipar arquivos!")
@@ -460,7 +460,7 @@ const deleteTempFiles = async (files, origin) => {
             }
         } else {
             const userFolderExist = fs.existsSync(origin)
-            userFolderExist ? fs.rmSync(origin, { recursive: true, force: true }) : false
+            userFolderExist ? fs.rmSync(origin, { recursive: false, force: false }) : false
         }
     } catch (error) {
         console.log("deleteTempFiles: erro ao apagar arquivo(s)")
