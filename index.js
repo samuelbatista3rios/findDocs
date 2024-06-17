@@ -137,6 +137,9 @@ app.post("/find", async (req, res) => {
                 var zipFilePath = path.join(userPath, zipFileName);
                 var zipped = await aux.zipFolder(originDir, zipFilePath)
             }
+            // if (zipped) {
+            //     await aux.deleteTempFiles(false, originDir)
+            // }
             req.session.userData = {
                 xlsData,
                 xlsFileName,

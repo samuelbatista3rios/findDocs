@@ -434,9 +434,7 @@ const zipFolder = async (folderPath, fileName) => {
         zipper.pipe(saidaZip);
         zipper.finalize();
         saidaZip.on("close", () => {
-            deleteTempFiles(false, folderPath)
             return true
-
         });
         return true
     } catch (error) {
@@ -453,7 +451,7 @@ const NormalizeString = (string) => {
     return string;
 }
 
-const deleteTempFiles = (files, origin) => {
+const deleteTempFiles = async (files, origin) => {
     try {
         if (files) {
             for (const file of files) {
