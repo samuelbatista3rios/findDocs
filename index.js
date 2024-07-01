@@ -133,27 +133,30 @@ app.post("/find", async (req, res) => {
         if (dataset.recordset.length > 0) {
             logs.writeLog(userId, `END FIND > ${setor} > RESULTS: ${dataset.recordset.length}`)
             xlsData = await aux.createXls(dataset.recordset, xlsFileName, userPath, setor)
-            if (setor != "Financeiro" && xlsData[0].length > 0) {
+            if (setor != "Financeiro" && xlsData.length > 0) {
                 var originDir = path.join(userPath, "files");
                 var zipFilePath = path.join(userPath, zipFileName);
-                var totalFilesDownloaded = xlsData[1]
-                console.log(aux.countValuesInPath(originDir), totalFilesDownloaded)
-                if (aux.countValuesInPath(originDir) == totalFilesDownloaded) var zipped = await aux.zipFolder(originDir, zipFilePath)
-                // if (zipped) await aux.deleteTempFiles(originDir)
+                await aux.zipFolder(originDir, zipFilePath)
+                    .then(result => {
+                        if (result) aux.deleteTempFiles(false, originDir)
+                    })
+                    .catch(error => {
+                        console.log('Zip creation failed:', error);
+                    });
             }
 
             req.session.userData = {
-                xlsData: xlsData[0],
+                xlsData,
                 xlsFileName,
                 zipFileName,
-                setor: setor
+                setor
             };
             res.send({
                 msg: "Planilha e arquivo disponivel para download!",
                 xlsFileName,
-                userId: userId,
+                userId,
                 zipFileName,
-                setor: setor,
+                setor,
                 status: 200
             });
         } else {

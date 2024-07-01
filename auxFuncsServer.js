@@ -80,7 +80,7 @@ const requestDownloadUrl = async (fileId) => {
 // Requisita ao FLUIG a URL para download do arquivo e aciona o metodo para download
 const requestDownloadFile = async (savePath, filesId, fileName, subFolder) => {
     try {
-        let downloadStatus = [];
+        let downloadStatus = false
         if (typeof (filesId) == "object") {
             for (const fileId of filesId) {
                 const savemergedPath = path.join(savePath, subFolder);
@@ -88,26 +88,20 @@ const requestDownloadFile = async (savePath, filesId, fileName, subFolder) => {
                 fileName ? fileDownloadedPath = path.join(savemergedPath, fileName) : fileDownloadedPath = path.join(savemergedPath, `${fileId}.pdf`);
                 await createFolder(savemergedPath);
                 var urlToDownload = await requestDownloadUrl(fileId);
-                await downloadFile(urlToDownload, fileDownloadedPath);
-                downloadStatus.push(true);
+                urlToDownload ? await downloadFile(urlToDownload, fileDownloadedPath) ? downloadStatus = true : downloadStatus = false : downloadStatus = false
             }
         } else {
             const savemergedPath = path.join(savePath, subFolder);
             await createFolder(savemergedPath);
             const fileDownloadedPath = path.join(savemergedPath, fileName);
             var urlToDownload = await requestDownloadUrl(filesId);
-            if (urlToDownload) {
-                await downloadFile(urlToDownload, fileDownloadedPath);
-                downloadStatus.push(true);
-            } else {
-                downloadStatus.push(false);
-            }
+            urlToDownload ? await downloadFile(urlToDownload, fileDownloadedPath) ? downloadStatus = true : downloadStatus = false : downloadStatus = false
         }
         return downloadStatus;
     } catch (error) {
         console.log("requestDownloadFile: ID do arquivo inválido/nulo!");
         logs.writeLog("Error", "requestDownloadFile: ID do arquivo inválido/nulo!");
-        return [];
+        return false
     }
 };
 
@@ -127,7 +121,7 @@ const downloadFile = async (url, saveFileInPath) => {
         return new Promise((resolve, reject) => {
             writer.on("finish", () => {
                 resolve(true)
-                return true
+                // return true
             })
             writer.on("error", (error) => {
                 fs.unlink(mergedPathProd, () => { reject(error) })
@@ -373,7 +367,6 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                     await createFolder(filesPath)
                     var fileDownloaded = false
                     fileDownloaded = await requestDownloadFile(filesPath, row["COD_DOCUMENTO"], row["NOME_DOCUMENTO"], "")
-                    fileDownloaded ? countDownloadedFiles++ : countDownloadedFiles--
                     var values = [...Object.values(row), fileDownloaded ? "Sim" : "Não"];
                     worksheet.addRow(values);
                     xlsFile.push({ ...row, "Arquivo disponivel no GED?": fileDownloaded ? "Sim" : "Não" });
@@ -394,7 +387,7 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
         // Salvar o arquivo
         await workbook.xlsx.writeFile(filePath);
 
-        return [xlsFile, countDownloadedFiles]
+        return xlsFile
     } catch (error) {
         console.log("createXls: Erro ao criar arquivo XLS!", error)
         logs.writeLog("Error", "createXls: Erro ao criar arquivo XLS!", error)
@@ -418,30 +411,64 @@ const createFolder = async (newFolder) => {
 
 // Unifica a pasta do usuario em zip e retorna para download
 const zipFolder = async (folderPath, fileName) => {
-    try {
-        const saidaZip = fs.createWriteStream(fileName);
-        const zipper = archiver("zip", {
-            zlib: { level: 9 }
-        });
-        saidaZip.on("error", (erro) => {
-            console.log("saidaZip: " + erro)
-            logs.writeLog("Error", "saidaZip: " + erro)
-        });
-        zipper.on("error", (erro) => {
-            console.log("zipper: " + erro)
-            logs.writeLog("Error", "zipper: " + erro)
-        });
-        zipper.directory(folderPath, false);
-        zipper.pipe(saidaZip);
-        zipper.finalize();
-        saidaZip.on("close", () => {
-            return true
-        });
-    } catch (error) {
-        console.log("zipFolder: Erro ao zipar arquivos!")
-        logs.writeLog("Error", "zipFolder: Erro ao zipar arquivos!")
-        return false
-    }
+    return new Promise((resolve, reject) => {
+        try {
+            const saidaZip = fs.createWriteStream(fileName);
+            const zipper = archiver("zip", {
+                zlib: { level: 9 }
+            });
+
+            saidaZip.on("error", (erro) => {
+                console.log("saidaZip: " + erro);
+                logs.writeLog("Error", "saidaZip: " + erro);
+                reject(false);
+            });
+
+            zipper.on("error", (erro) => {
+                console.log("zipper: " + erro);
+                logs.writeLog("Error", "zipper: " + erro);
+                reject(false);
+            });
+
+            saidaZip.on("close", () => {
+                resolve(true);
+            });
+
+            zipper.directory(folderPath, false);
+            zipper.pipe(saidaZip);
+            zipper.finalize();
+        } catch (error) {
+            console.log("zipFolder: Erro ao zipar arquivos!");
+            logs.writeLog("Error", "zipFolder: Erro ao zipar arquivos!");
+            reject(false);
+        }
+    });
+    // try {
+    //     const saidaZip = fs.createWriteStream(fileName);
+    //     const zipper = archiver("zip", {
+    //         zlib: { level: 9 }
+    //     });
+    //     saidaZip.on("error", (erro) => {
+    //         console.log("saidaZip: " + erro)
+    //         logs.writeLog("Error", "saidaZip: " + erro)
+    //         return false
+    //     });
+    //     zipper.on("error", (erro) => {
+    //         console.log("zipper: " + erro)
+    //         logs.writeLog("Error", "zipper: " + erro)
+    //         return false
+    //     });
+    //     zipper.directory(folderPath, false);
+    //     zipper.pipe(saidaZip);
+    //     saidaZip.on("close", () => {
+    //         return true
+    //     });
+    //     zipper.finalize();
+    // } catch (error) {
+    //     console.log("zipFolder: Erro ao zipar arquivos!")
+    //     logs.writeLog("Error", "zipFolder: Erro ao zipar arquivos!")
+    //     return false
+    // }
 }
 
 const NormalizeString = (string) => {
@@ -460,9 +487,10 @@ const deleteTempFiles = async (files, origin) => {
             }
         } else {
             const userFolderExist = fs.existsSync(origin)
-            userFolderExist ? fs.rmSync(origin, { recursive: false, force: false }) : false
+            userFolderExist ? fs.rmSync(origin, { recursive: true, force: true }) : false
         }
     } catch (error) {
+        console.log(error)
         console.log("deleteTempFiles: erro ao apagar arquivo(s)")
         logs.writeLog("Error", "deleteTempFiles: erro ao apagar arquivo(s)")
     }
