@@ -124,7 +124,7 @@ const downloadFile = async (url, saveFileInPath) => {
                 // return true
             })
             writer.on("error", (error) => {
-                fs.unlink(mergedPathDev, () => { reject(error) })
+                fs.unlink(mergedPathProd, () => { reject(error) })
                 return false
             })
         })
@@ -239,14 +239,14 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         case "ARQUIVO NF":
                                             if (fileName.includes("CP_")) {
                                                 fileName = fileName.replace("CP", "MERGED")
-                                                const downloadedFiles = await requestDownloadFile(mergedPathDev, [nfFile, pesqFile], null, pastaFilial)
+                                                const downloadedFiles = await requestDownloadFile(mergedPathProd, [nfFile, pesqFile], null, pastaFilial)
                                                 if (downloadedFiles.filter(y => y == true).length == 2) {
-                                                    const mergedJS = await mergeFiles([nfFile, pesqFile], fileName, path.join(mergedPathDev, pastaFilial))
+                                                    const mergedJS = await mergeFiles([nfFile, pesqFile], fileName, path.join(mergedPathProd, pastaFilial))
                                                     if (mergedJS) {
-                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathDev, pastaFilial))
+                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathProd, pastaFilial))
                                                     } else {
-                                                        await mergePy.executarMerge([nfFile, pesqFile], fileName, path.join(mergedPathDev, pastaFilial))
-                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathDev, pastaFilial))
+                                                        await mergePy.executarMerge([nfFile, pesqFile], fileName, path.join(mergedPathProd, pastaFilial))
+                                                        deleteTempFiles([nfFile, pesqFile], path.join(mergedPathProd, pastaFilial))
                                                     }
                                                 } else {
                                                     logs.writeLog("Error ao baixar: ", `NF: ${nfFile} - PESQ: ${pesqFile}`)
@@ -318,14 +318,14 @@ const createXls = async (dataset, xlsName, userPath, origin) => {
                                         case "ARQUIVO NF":
                                             if (fileName.includes("CP_")) {
                                                 fileName = fileName.replace("CP", "MERGED_CUS")
-                                                const downloadedFiles = await requestDownloadFile(mergedPathDev, [pesqFile, nfFile], null, pastaFilial)
+                                                const downloadedFiles = await requestDownloadFile(mergedPathProd, [pesqFile, nfFile], null, pastaFilial)
                                                 if (downloadedFiles.filter(y => y == true).length == 2) {
-                                                    const mergedJS = await mergeFiles([pesqFile, nfFile], fileName, path.join(mergedPathDev, pastaFilial))
+                                                    const mergedJS = await mergeFiles([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
                                                     if (mergedJS) {
-                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathDev, pastaFilial))
+                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathProd, pastaFilial))
                                                     } else {
-                                                        await mergePy.executarMerge([pesqFile, nfFile], fileName, path.join(mergedPathDev, pastaFilial))
-                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathDev, pastaFilial))
+                                                        await mergePy.executarMerge([pesqFile, nfFile], fileName, path.join(mergedPathProd, pastaFilial))
+                                                        deleteTempFiles([pesqFile, nfFile], path.join(mergedPathProd, pastaFilial))
                                                     }
                                                 }
                                             }
